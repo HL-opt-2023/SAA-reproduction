@@ -36,15 +36,13 @@ A brief description of each experiment:
 ├── exp1_linreg/
 │   └── run_exp1.m                    main driver (single-cell + aggregator)
 ├── exp2_utility/
-│   ├── run_exp2.m                    main driver
-│   └── smd_recompute.m               recompute SMD columns w/ updated θ
+│   └── run_exp2.m                    main driver (single-cell + aggregator)
 ├── slurm/                            HPC batch scripts
 │   ├── run_exp1.slurm                aggregator job
 │   ├── sweep_exp1.slurm              13 d × 3 N = 39-task array (parallel)
 │   ├── run_exp2.slurm                aggregator job
 │   ├── sweep_exp2.slurm              39-task array (parallel)
 │   ├── precompute_xref.slurm         x_ref reference solve (Exp 2 bootstrap)
-│   ├── smd_recompute.slurm           SMD-only patch when θ changes
 │   └── deploy.sh                     rsync local → cluster + sbatch
 └── results/                          generated outputs
     ├── exp1/                         exp1_results.mat + Fig 2/3 PNGs
