@@ -1,17 +1,18 @@
 #!/bin/bash
+# NOTE: edit --account=YOUR_ACCOUNT and --qos=YOUR_QOS below for your cluster.
 #SBATCH --job-name=saa_smdfix
-#SBATCH --account=liu.h
-#SBATCH --qos=liu.h-b
+#SBATCH --account=YOUR_ACCOUNT
+#SBATCH --qos=YOUR_QOS
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=4gb
 #SBATCH --time=2:00:00
-#SBATCH --output=/orange/liu.h/hongcheng/saa/logs/smdfix_%j.out
-#SBATCH --error=/orange/liu.h/hongcheng/saa/logs/smdfix_%j.err
+#SBATCH --output=logs/smdfix_%j.out
+#SBATCH --error=logs/smdfix_%j.err
 
 set -euo pipefail
-SAA_ROOT=/orange/liu.h/hongcheng/saa
+SAA_ROOT=${SAA_ROOT:-/path/to/your/saa}
 EXP_DIR=${SAA_ROOT}/exp2_utility
 mkdir -p ${SAA_ROOT}/logs
 module purge

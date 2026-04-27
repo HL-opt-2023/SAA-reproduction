@@ -1,18 +1,19 @@
 #!/bin/bash
+# NOTE: edit --account=YOUR_ACCOUNT and --qos=YOUR_QOS below for your cluster.
 #SBATCH --job-name=saa_exp2
-#SBATCH --account=liu.h
-#SBATCH --qos=liu.h-b
+#SBATCH --account=YOUR_ACCOUNT
+#SBATCH --qos=YOUR_QOS
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=16gb
 #SBATCH --time=36:00:00
-#SBATCH --output=/orange/liu.h/hongcheng/saa/logs/exp2_%j.out
-#SBATCH --error=/orange/liu.h/hongcheng/saa/logs/exp2_%j.err
+#SBATCH --output=logs/exp2_%j.out
+#SBATCH --error=logs/exp2_%j.err
 
 set -euo pipefail
 
-SAA_ROOT=/orange/liu.h/hongcheng/saa
+SAA_ROOT=${SAA_ROOT:-/path/to/your/saa}
 EXP_DIR=${SAA_ROOT}/exp2_utility
 mkdir -p ${SAA_ROOT}/logs ${EXP_DIR}/results
 

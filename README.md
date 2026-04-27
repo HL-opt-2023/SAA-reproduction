@@ -2,9 +2,16 @@
 
 This repository reproduces the two numerical experiments in
 
-> Hongcheng Liu and Jindong Tong (2024).
-> *Sample Average Approximation: Sample Complexity Bounds Free of Metric Entropy*.
-> arXiv:2401.00664.
+> Liu, H. and Tong, J. (2026).
+> *Metric entropy-free sample complexity bounds for sample average
+> approximation in convex stochastic programming*.
+> Mathematical Programming.
+> https://doi.org/10.1007/s10107-026-02335-3
+
+> **Disclaimer.** The repository layout, helper scripts, READMEs, and
+> SLURM batch files were reorganized by [Claude Code](https://claude.com/claude-code)
+> for clarity and reproducibility.  The numerical algorithms, problem
+> formulation, and experimental design follow the paper.
 
 A brief description of each experiment:
 
@@ -49,8 +56,10 @@ A brief description of each experiment:
 ### Prerequisites
 
 * MATLAB 2024a or newer (uses `containers.Map`, `tiledlayout`).
-* For the parallel SLURM runs: a SLURM cluster with a MATLAB module
-  (we used HiPerGator's `matlab/2025b` and the `liu.h-b` burst QOS).
+* For the parallel SLURM runs: a SLURM cluster with a MATLAB module.
+  The `slurm/*.slurm` files contain placeholders `--account=YOUR_ACCOUNT`
+  and `--qos=YOUR_QOS` that you must edit for your cluster.  Output paths
+  are written under `./logs/` relative to the submission directory.
 
 ### One-shot local run
 
@@ -75,15 +84,15 @@ seeded RNG.
 bash slurm/deploy.sh
 
 # 2.  (Exp 2 only.)  Compute the high-fidelity reference x_ref{d}.
-ssh hpg "cd /orange/liu.h/hongcheng/saa/slurm && sbatch precompute_xref.slurm"
+ssh CLUSTER "cd $SAA_ROOT/slurm && sbatch precompute_xref.slurm"
 
 # 3.  Submit the parallel cell sweep (one task per (N, d)).
-ssh hpg "cd /orange/liu.h/hongcheng/saa/slurm && sbatch sweep_exp1.slurm"
-ssh hpg "cd /orange/liu.h/hongcheng/saa/slurm && sbatch sweep_exp2.slurm"
+ssh CLUSTER "cd $SAA_ROOT/slurm && sbatch sweep_exp1.slurm"
+ssh CLUSTER "cd $SAA_ROOT/slurm && sbatch sweep_exp2.slurm"
 
 # 4.  Once all 39 cells per experiment are on disk, run the aggregator.
-ssh hpg "cd /orange/liu.h/hongcheng/saa/slurm && sbatch run_exp1.slurm"
-ssh hpg "cd /orange/liu.h/hongcheng/saa/slurm && sbatch run_exp2.slurm"
+ssh CLUSTER "cd $SAA_ROOT/slurm && sbatch run_exp1.slurm"
+ssh CLUSTER "cd $SAA_ROOT/slurm && sbatch run_exp2.slurm"
 ```
 
 The sweep array writes per-cell `.mat` files to
@@ -129,7 +138,28 @@ save('data/exp2/piecewise_parameter.mat', 'v', 's');
 
 and rerun the entire pipeline (re-bootstrap → re-CV → re-sweep).
 
-## License & contact
+## License
 
-Code by HL-opt-2023 (https://github.com/HL-opt-2023).  Cite the paper
-above if you use this code.
+This code is released under the MIT License (see `LICENSE`).
+
+## Citation
+
+If you use this code, please cite the paper that introduces the
+numerical experiments.  The version of record appears in
+*Mathematical Programming*:
+
+```bibtex
+@article{LiuTong2026SAA,
+  author  = {Liu, Hongcheng and Tong, Jindong},
+  title   = {Metric entropy-free sample complexity bounds for
+             sample average approximation in convex stochastic
+             programming},
+  journal = {Mathematical Programming},
+  year    = {2026},
+  doi     = {10.1007/s10107-026-02335-3}
+}
+```
+
+## Contact
+
+Code maintained by HL-opt-2023 (https://github.com/HL-opt-2023).

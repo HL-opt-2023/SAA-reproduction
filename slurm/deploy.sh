@@ -8,7 +8,7 @@ set -euo pipefail
 
 REMOTE=${HPG_REMOTE:-hpg}                                # SSH alias or user@hpg.rc.ufl.edu
 LOCAL_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-REMOTE_ROOT=/orange/liu.h/hongcheng/saa
+REMOTE_ROOT=${SAA_ROOT:-/path/to/your/saa}
 
 echo "Syncing ${LOCAL_ROOT} → ${REMOTE}:${REMOTE_ROOT}"
 ssh "${REMOTE}" "mkdir -p ${REMOTE_ROOT}/logs"
