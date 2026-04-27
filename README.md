@@ -1,4 +1,4 @@
-# SAA Numerical Experiments
+# Sample average approximation for convex stochastic programming
 
 This repository reproduces the two numerical experiments in
 
