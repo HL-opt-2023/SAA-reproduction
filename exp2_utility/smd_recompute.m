@@ -1,5 +1,5 @@
 % Recompute the SMD-L1 / SMD-L2 columns of every existing per-cell sweep
-% file, using the CV-selected theta values under user's vk, sk.
+% file, using the cross-validation-selected theta values under user's vk, sk.
 % SAA / LASSO entries are preserved; only SMD columns change.
 
 clear; close all; rng(0);
@@ -21,7 +21,7 @@ N_list   = [200 400 600];
 d_list   = [100 200 300 400 500 600 700 800 900 1000 1500 2000 5000];
 num_reps = 5;
 
-% ---------- CV-selected theta under user's vk, sk ----------
+% ---------- cross-validation-selected theta under user's vk, sk ----------
 theta_smd_l1 = 6;
 theta_smd_l2 = 0.6;
 fprintf('Updating SMD columns with theta_L1=%g, theta_L2=%g\n', ...

@@ -22,7 +22,7 @@ gd_max_iter  = 500000;
 gd_tol       = 1e-7;
 M_pen        = 1000;     % penalty coefficient for box constraint
 n_test       = 1e4;      % Monte Carlo for gap evaluation
-% SMD stepsize CV (Appendix E of the paper):
+% SMD stepsize cross-validation (Appendix E of the paper):
 %   theta in {a*b : a=1..9, b in {0.1,1,10,100,1000}},
 %   fix d=1000, N=600, 5 reps, two i.i.d. sample sets (optimize / validate).
 theta_cv_grid = reshape((1:9)' * [0.1 1 10 100 1000], [], 1);
@@ -168,9 +168,9 @@ if ~in_sweep_mode
     save(xref_path, 'x_ref', 'd_list', 'N_ref', 'vk', 'sk', 'M_pen', 'alpha');
 end
 
-% --------------------- lambda_0 (use prior CV picks; skip CV) -------
-% Paper grid is {0.01, 0.05, ..., 0.5}; CV always picked the endpoint 0.5.
-% Hard-code values from prior CV runs.
+% --------------------- lambda_0 (use prior cross-validation picks; skip cross-validation) -------
+% Paper grid is {0.01, 0.05, ..., 0.5}; cross-validation always picked the endpoint 0.5.
+% Hard-code values from prior cross-validation runs.
 methods_reg = [arrayfun(@(q) sprintf('SAA-L%.2f', q), q_prime_list, 'uni', 0), {'LASSO'}];
 lambda_best = containers.Map(methods_reg, num2cell(zeros(1, numel(methods_reg))));
 hardcoded_lam = struct('SAA_L1_01', 0.450, 'SAA_L2_00', 0.500, 'LASSO', 0.400);
@@ -188,8 +188,8 @@ for mi = 1:numel(methods_reg)
     fprintf('  %-10s  lambda_0 = %.3f  (hardcoded)\n', name, lambda_best(name));
 end
 
-% --------------------- theta for SMD (use prior CV picks; skip CV) --
-% Prior CV (45-candidate Appendix-E grid) consistently picked
+% --------------------- theta for SMD (use prior cross-validation picks; skip cross-validation) --
+% Prior cross-validation (45-candidate Appendix-E grid) consistently picked
 %   theta_SMD_L1 = 90  and  theta_SMD_L2 = 1.
 theta_smd_l1 = 90;
 theta_smd_l2 = 1;
@@ -197,7 +197,7 @@ fprintf('  theta_SMD_L1 = %g   theta_SMD_L2 = %g  (hardcoded)\n', ...
         theta_smd_l1, theta_smd_l2);
 
 % --------------------- Main sweep -----------------------------------
-% methods_reg = CV-selected lambda; (no fixed-lambda comparison column this run)
+% methods_reg = cross-validation-selected lambda; (no fixed-lambda comparison column this run)
 methods_reg_fixed = {};
 methods_all = [{'SAA_r','SAA_0'}, methods_reg, methods_reg_fixed, {'SMD_L1','SMD_L2'}];
 nM = numel(methods_all);
@@ -695,7 +695,7 @@ function x = smd_l1_solve(coef, vk, sk, Rl1, N, d, theta, M_pen)
     %   s.t. 1'*y_plus + 1'*y_minus + s = 1, y_plus, y_minus, s >= 0.
     % Variable z = [y_plus; y_minus; s] in 2d+1 simplex.
     % Step size (Nemirovski et al. 2009): theta * sqrt(2*ln(K)) / (Minf * sqrt(N)).
-    % theta is selected by the CV procedure in Appendix E of Liu & Tong 2024.
+    % theta is selected by the cross-validation procedure in Appendix E of Liu & Tong 2024.
     K = 2*d + 1;
     z = ones(K, 1) / K;                        % uniform init on simplex
     Minf = estimate_Minf(coef, sk, Rl1, N, M_pen);
@@ -727,7 +727,7 @@ end
 function x = smd_l2_solve(coef, vk, sk, Rl2, N, d, theta, M_pen)
     % Robust stochastic approximation (2-norm).
     % Step size (Nemirovski et al. 2009): theta * Rl2 / (M2 * sqrt(N)).
-    % theta is selected by the CV procedure in Appendix E of Liu & Tong 2024.
+    % theta is selected by the cross-validation procedure in Appendix E of Liu & Tong 2024.
     x = zeros(d, 1);
     M2 = estimate_M2(coef, sk, Rl2, N, M_pen);
     gamma = theta * Rl2 / (max(M2, 1e-6) * sqrt(N));

@@ -112,10 +112,10 @@ the figures.
 * **SMD-L2**: robust SA in the 2-norm setting with Euclidean projection
   on `‖x‖_2 ≤ R_ℓ2`.
 * **Cross-validation**:
-  * λ-CV on (d=1000, N=200) over the paper's grid `{0.01, 0.05, …,
+  * lambda cross-validation on (d=1000, N=200) over the paper's grid `{0.01, 0.05, …,
     0.5}`; in our experiments the grid endpoint `0.5` was always
     selected, so the published `run_exp{1,2}.m` hard-codes `0.5`.
-  * θ-CV (Appendix E) for SMD step size on (d=1000, N=600) over
+  * theta cross-validation (Appendix E) for SMD step size on (d=1000, N=600) over
     `{a·b : a∈1..9, b∈{0.1, 1, 10, 100, 1000}}`.  Selected values
     under `data/exp2/piecewise_parameter.mat`:
     `θ_SMD-L1 = 6`, `θ_SMD-L2 = 0.6`.
@@ -126,7 +126,7 @@ the figures.
 
 The deterministic problem coefficients `(v_k, s_k)` are bundled in
 `data/exp2/piecewise_parameter.mat` and reused across every solver,
-CV, and replication.  **Do not regenerate them between experiments**
+cross-validation, and replication.  **Do not regenerate them between experiments**
 — the same `(v, s)` must be applied uniformly.
 
 To regenerate them (e.g., to test seed sensitivity), run
@@ -136,7 +136,7 @@ rng(1);  v = randn(10, 1);  s = randn(10, 1);
 save('data/exp2/piecewise_parameter.mat', 'v', 's');
 ```
 
-and rerun the entire pipeline (re-bootstrap → re-CV → re-sweep).
+and rerun the entire pipeline (re-bootstrap → re-run-cross-validation → re-sweep).
 
 ## License
 

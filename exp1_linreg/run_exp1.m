@@ -24,9 +24,9 @@ gd_tol       = 1e-8;       % unused (relative-stability window-based termination
 outdir       = fullfile(fileparts(mfilename('fullpath')), 'results');
 if ~exist(outdir, 'dir'); mkdir(outdir); end
 
-% --------------------- lambda_0 (use prior CV picks; skip CV) -------
-% Prior CV (paper grid {0.01, 0.05, ..., 0.5}) always picked the endpoint 0.5
-% across all q' and LASSO. Hard-code 0.5 to skip the slow CV stage.
+% --------------------- lambda_0 (use prior cross-validation picks; skip cross-validation) -------
+% Prior cross-validation (paper grid {0.01, 0.05, ..., 0.5}) always picked the endpoint 0.5
+% across all q' and LASSO. Hard-code 0.5 to skip the slow cross-validation stage.
 methods_reg = [arrayfun(@(q) sprintf('SAA-L%.2f', q), q_prime_list, 'uni', 0), {'LASSO'}];
 lambda_best = containers.Map(methods_reg, num2cell(0.5*ones(1, numel(methods_reg))));
 for mi = 1:numel(methods_reg)
