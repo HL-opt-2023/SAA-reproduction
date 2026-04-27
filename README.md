@@ -13,16 +13,115 @@ This repository reproduces the two numerical experiments in
 > for clarity and reproducibility.  The numerical algorithms, problem
 > formulation, and experimental design follow the paper.
 
-A brief description of each experiment:
+## Problem instances tested
 
-* **Experiment 1** ([`exp1_linreg/`](exp1_linreg/)) — light-tailed
-  stochastic linear regression (paper Section 4.1, Tables S1–S3, Fig 2/3).
-  Regressor `a ∼ 𝒩(0, Σ)` with `Σᵢⱼ = 0.5^|i−j|`; response
-  `b = a'·x* + w` with `w ∼ 𝒩(0,1)`.
-* **Experiment 2** ([`exp2_utility/`](exp2_utility/)) — heavy-tailed
-  stochastic utility problem (paper Section 4.2, Tables S4–S8,
-  Fig 4/4b).  Subgradient admits a bounded second moment but is
-  heavy-tailed.
+### Experiment 1 — light-tailed stochastic quadratic program (Section 4.1)
+
+A population-level linear regression instance, following Fan et al.
+(2014) and Liu et al. (2019):
+
+```
+min_{x ∈ ℝ^d}  E_{(a,b)} [ (a'x - b)^2 ]
+```
+
+* `a ∈ ℝ^d` is a centered Gaussian random vector with covariance
+  `Σ_{i,j} = 0.5^|i-j|`.
+* `b = a'·x* + w`, where `w ~ 𝒩(0, 1)` is independent of `a`.
+* The optimal solution is `x*`, generated once per instance:
+  pick `r = min{d, 200}` indices uniformly at random as the support
+  set `S`; let `x*_S = 1.5 u / ‖u‖_{1.8}` and `x*_{S^c} = 1.5 v / ‖v‖_{1.8}`,
+  with `u, v` i.i.d. standard Gaussian.  This construction keeps
+  `‖x*‖_{1.8}` small for all dimensions while leaving `x*` non-sparse.
+* For each `(d, N)` we draw an i.i.d. sample `(a_j, b_j)`, `j=1..N`.
+
+Reported in paper: Tables S1–S3, Figures 2 and 3.
+
+### Experiment 2 — heavy-tailed stochastic utility problem (Section 4.2)
+
+Adapted from Nemirovski et al. (2009):
+
+```
+min_{x ∈ ℝ^d}  E[ f(x, ξ) ],
+
+f(x, ξ) = ϕ( Σ_{i=1}^d (i/d + r_i) x_i )
+        + (M/2) Σ_i (x_i - 1)_+^2  +  (M/2) Σ_i (-x_i - 1)_+^2
+```
+
+* `ϕ(t) = max_{k=1..10} (v_k + s_k t)` is piecewise affine, with
+  `v_k, s_k ~ 𝒩(0, 1)` drawn **once** at the start of the experiment
+  and fixed thereafter (bundled in `data/exp2/piecewise_parameter.mat`).
+* The two `(M/2)·(·)_+^2` terms (with `M = 1000`) are quadratic
+  penalties enforcing the box `{-1 ≤ x_i ≤ 1}`.
+* Heavy-tailed noise: `r_i = ν_i - E[ν_i]`, with `ν_i` i.i.d. drawn
+  from a Pareto Type I distribution (shape 3.01, scale 1).  This
+  yields a subgradient with bounded second moment but heavy tails.
+* No closed-form `x*` — a high-fidelity reference is computed by
+  solving the unregularized Sample Average Approximation (SAA) at
+  `N_ref = 5000` for each `d`, cached in `cache/x_ref_d<d>.mat`.
+
+Reported in paper: Tables S4–S8, Figures 4 and 4b.
+
+### Sweep grid (both experiments)
+
+* `d ∈ {100, 200, …, 900, 1000, 1500, 2000, 5000}` (13 dimensions)
+* `N ∈ {200, 400, 600}`
+* 5 independent replications per `(N, d)`
+
+## Algorithms compared
+
+Both experiments share the SAA-family methods (A)–(D) below; Experiment
+2 additionally includes the two stochastic mirror descent variants (E)
+and (F).
+
+(A) **SAA_r** — vanilla SAA solving the empirical objective
+    `(1/N) Σ_j ℓ(x; ξ_j)`, started from `x_0 ~ Uniform(-0.5, 0.5)^d`.
+
+(B) **SAA_0** — same SAA formulation, started from `x_0 = 0`.
+
+(C) **SAA-L_{q'}** — Tikhonov-regularized SAA
+    `min_x  (1/N) Σ_j ℓ(x; ξ_j)  +  (λ_0 / 2) ‖x‖_{q'}^2`
+    for `q' ∈ {1.01, 1.5, 2}`, started from the same `x_0` as SAA_r.
+
+(D) **LASSO** — Tibshirani (1996) formulation
+    `min_x  (1/N) Σ_j ℓ(x; ξ_j)  +  λ_0 ‖x‖_1`,
+    solved by iterative soft-thresholding (Chambolle et al. 1998),
+    started from the same `x_0` as SAA_r.
+
+(E) **SMD-L1** — entropic stochastic mirror descent (Nemirovski et al.
+    2009) on the simplex reformulation of `‖x‖_1 ≤ R_{ℓ1}` (paper
+    Eq. (93), with `R_{ℓ1} = 2.5 · ‖x*‖_1`).  Step size
+    `γ = θ · √(2 ln(2d+1)) / (M̃_∞ √N)`, where `θ` is selected by
+    cross-validation per Appendix E.  *(Experiment 2 only.)*
+
+(F) **SMD-L2** — robust stochastic approximation (Nemirovski et al.
+    2009) on the 2-norm-constrained reformulation
+    `min { F(x) : ‖x‖_2 ≤ R_{ℓ2} }` with `R_{ℓ2} = 2.5 · ‖x*‖_2`.
+    Step size `γ = θ · ‖x*‖_2 / (M̃_2 √N)`; initial point at the
+    origin; Euclidean projection onto the 2-norm ball each iteration.
+    *(Experiment 2 only.)*
+
+The pairings used in the paper's Figure 4 are (i) SAA-L_{1.01} versus
+SMD-L1 (matched 1-norm geometry) and (ii) SAA-L_2 versus SMD-L2
+(matched 2-norm geometry).
+
+## Metrics reported
+
+* **Approximate suboptimality gap.**
+  Experiment 1 uses the population-level closed form
+  `(x − x*)' Σ (x − x*)` (which equals `E[(a'x − b)^2] − E[(a'x* − b)^2]`).
+  Experiment 2 uses Monte-Carlo:
+  `Gap(x) = (1/n_test) Σ_j [f(x, ξ̃_j) − f(x*, ξ̃_j)]` with
+  `n_test = 10⁴`.
+* **ℓ₂-loss.**  `‖x − x*‖_2`.
+* **Wall-clock runtime.**  Per-call solver time in seconds.
+
+For Experiment 2 Figure 4, the paper's relative-difference metric is
+also computed:
+
+```
+RelDiff(x) = 100 · ( Gap(x_SMD) − Gap(x_SAA) )
+                  / ( (1/n_test) Σ_j f(x*, ξ̃_j) )    %
+```
 
 ## Repo layout
 
@@ -31,17 +130,19 @@ A brief description of each experiment:
 ├── README.md                  ← this file
 ├── data/                      ← problem coefficients (loaded once, fixed)
 │   └── exp2/
-│       ├── piecewise_parameter.mat   (v, s for ϕ(t) = max_k(v_k + s_k·t))
-│       └── x_init.mat                (per-d initial points for SAA-L*)
+│       └── piecewise_parameter.mat   (v, s for ϕ(t) = max_k(v_k + s_k·t))
 ├── exp1_linreg/
 │   └── run_exp1.m                    main driver (single-cell + aggregator)
 ├── exp2_utility/
 │   └── run_exp2.m                    main driver (single-cell + aggregator)
 ├── slurm/                            HPC batch scripts
 │   ├── run_exp1.slurm                aggregator job
-│   ├── sweep_exp1.slurm              13 d × 3 N = 39-task array (parallel)
+│   ├── sweep_exp1.slurm              SLURM array job — one task per
+│   │                                  (sample size N, dimension d)
+│   │                                  combination (3 × 13 = 39 tasks)
 │   ├── run_exp2.slurm                aggregator job
-│   ├── sweep_exp2.slurm              39-task array (parallel)
+│   ├── sweep_exp2.slurm              same parallel scheme for
+│   │                                  Experiment 2
 │   ├── precompute_xref.slurm         x_ref reference solve (Exp 2 bootstrap)
 │   └── deploy.sh                     rsync local → cluster + sbatch
 └── results/                          generated outputs
@@ -75,7 +176,15 @@ The data files in `data/exp2/` are loaded automatically by
 `run_exp2.m`; `run_exp1.m` generates problem instances on-the-fly with
 seeded RNG.
 
-### Parallel SLURM run (13 d × 3 N = 39-cell sweep)
+### Parallel SLURM run
+
+The expensive part of each experiment is the main sweep — for every
+combination of sample size `N ∈ {200, 400, 600}` and dimension
+`d ∈ {100, …, 5000}`, five replications are run for each algorithm.
+Rather than executing all of these one-by-one in a single job, the
+provided SLURM scripts launch a job array in which each task handles a
+single `(N, d)` combination.  With three sample sizes and thirteen
+dimensions there are 39 such tasks per experiment.
 
 ```bash
 # 1.  Push code + data to the cluster.
@@ -93,10 +202,12 @@ ssh CLUSTER "cd $SAA_ROOT/slurm && sbatch run_exp1.slurm"
 ssh CLUSTER "cd $SAA_ROOT/slurm && sbatch run_exp2.slurm"
 ```
 
-The sweep array writes per-cell `.mat` files to
-`<exp_dir>/cache/sweep/iN<i>_id<j>.mat`; the aggregator merges them
-into the final `<exp_dir>/results/exp{1,2}_results.mat` and produces
-the figures.
+Each array task writes its results to a separate `.mat` file under
+`<experiment>/cache/sweep/`, named after the indices of the sample
+size and dimension it handled.  The aggregator job then loads every
+such file, merges them into a single `<experiment>/results/exp{1,2}_results.mat`
+containing the full suboptimality / loss / runtime tables, and
+produces the figures from the paper.
 
 ## Solver design choices (matching the paper)
 
