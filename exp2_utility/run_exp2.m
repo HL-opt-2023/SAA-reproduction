@@ -31,24 +31,26 @@ N_smd_cv     = 600;
 outdir       = fullfile(fileparts(mfilename('fullpath')), 'results');
 if ~exist(outdir, 'dir'); mkdir(outdir); end
 
-% --------------------- phi parameters from user's .mat file ---------
-% Load v_k, s_k from piecewise_parameter.mat so our results match the user's
-% legacy code. Falls back to rng(1)+randn(10,1) if the file is unavailable.
+% --------------------- phi parameters from data/exp2/ ---------------
+% By default we load v_k, s_k from the bundled
+%     <repo>/data/exp2/piecewise_parameter.mat
+% so every experiment, cross-validation, and replication uses the same
+% piecewise-affine phi.  The script aborts if the file is missing — to
+% regenerate the coefficients from scratch see "Coefficient regeneration"
+% in the top-level README.
 pp_path = fullfile(fileparts(mfilename('fullpath')), '..', 'data', 'exp2', ...
                    'piecewise_parameter.mat');
-if exist(pp_path, 'file')
-    pp = load(pp_path);
-    vk = pp.v(:);
-    sk = pp.s(:);
-    K  = numel(vk);
-    fprintf('Loaded vk, sk from %s (K = %d).\n', pp_path, K);
-else
-    rng(1);
-    K  = 10;
-    vk = randn(K, 1);
-    sk = randn(K, 1);
-    fprintf('piecewise_parameter.mat not found; using rng(1) randn(10,1).\n');
+if ~exist(pp_path, 'file')
+    error(['piecewise_parameter.mat not found at %s.\n' ...
+           'Run the snippet in README.md (section "Coefficient ' ...
+           'regeneration") to (re)create it before launching run_exp2.'], ...
+          pp_path);
 end
+pp = load(pp_path);
+vk = pp.v(:);
+sk = pp.s(:);
+K  = numel(vk);
+fprintf('Loaded vk, sk from %s (K = %d).\n', pp_path, K);
 
 % Theoretical lower bound m_star = min_t max_k (v_k + s_k * t).
 % Used as Polyak f_star floor for the unregularized bootstrap (lam=0):
