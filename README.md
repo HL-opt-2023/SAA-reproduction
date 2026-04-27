@@ -1,4 +1,4 @@
-# SAA Numerical Experiments — Reproducibility Code
+# SAA Numerical Experiments
 
 This repository reproduces the two numerical experiments in
 
@@ -13,7 +13,7 @@ This repository reproduces the two numerical experiments in
 > for clarity and reproducibility.  The numerical algorithms, problem
 > formulation, and experimental design follow the paper.
 
-## Problem instances tested
+## Problem instances
 
 ### Experiment 1 — light-tailed stochastic quadratic program (Section 4.1)
 
@@ -67,7 +67,7 @@ Reported in paper: Tables S4–S8, Figures 4 and 4b.
 * `N ∈ {200, 400, 600}`
 * 5 independent replications per `(N, d)`
 
-## Algorithms compared
+## Algorithms and methods involved in the experiments
 
 Both experiments share the SAA-family methods (A)–(D) below; Experiment
 2 additionally includes the two stochastic mirror descent variants (E)
@@ -105,7 +105,7 @@ The pairings used in the paper's Figure 4 are (i) SAA-L_{1.01} versus
 SMD-L1 (matched 1-norm geometry) and (ii) SAA-L_2 versus SMD-L2
 (matched 2-norm geometry).
 
-## Metrics reported
+## Metrics
 
 * **Approximate suboptimality gap.**
   Experiment 1 uses the population-level closed form
