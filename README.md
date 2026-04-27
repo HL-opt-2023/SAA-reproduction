@@ -88,13 +88,14 @@ and (F).
     started from the same `x_0` as SAA_r.
 
 (E) **SMD-L1** — entropic stochastic mirror descent (Nemirovski et al.
-    2009) on the simplex reformulation of `‖x‖_1 ≤ R_{ℓ1}` (paper
-    Eq. (93), with `R_{ℓ1} = 2.5 · ‖x*‖_1`).  Step size
-    `γ = θ · √(2 ln(2d+1)) / (M̃_∞ √N)`, where `θ` is selected by
-    cross-validation per Appendix E.  *(Experiment 2 only.)*
+    2009), applied to the simplex reformulation of `‖x‖_1 ≤ R_{ℓ1}`
+    given by Eq. (93) of the paper, with `R_{ℓ1} = 2.5 · ‖x*‖_1`.
+    Step size `γ = θ · √(2 ln(2d+1)) / (M̃_∞ √N)`, where `θ` is
+    selected by cross-validation per Appendix E.  *(Experiment 2 only.)*
 
 (F) **SMD-L2** — robust stochastic approximation (Nemirovski et al.
-    2009) on the 2-norm-constrained reformulation
+    2009), also based on the reformulation in Eq. (93) of the paper,
+    here in the 2-norm-constrained form
     `min { F(x) : ‖x‖_2 ≤ R_{ℓ2} }` with `R_{ℓ2} = 2.5 · ‖x*‖_2`.
     Step size `γ = θ · ‖x*‖_2 / (M̃_2 √N)`; initial point at the
     origin; Euclidean projection onto the 2-norm ball each iteration.
