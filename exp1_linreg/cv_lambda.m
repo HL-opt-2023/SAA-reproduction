@@ -1,16 +1,21 @@
-% cv_lambda.m  --  Cross-validate the regularization weight lambda_0 for
-% Experiment 1 (light-tailed linear regression).  Follows Section 4.1 of
-% Liu & Tong 2026:
+function lambda_best = cv_lambda()
+% CV_LAMBDA  Cross-validate the regularization weight lambda_0 for
+% Experiment 1 (light-tailed linear regression).  Follows Section 4.1
+% of Liu & Tong 2026:
 %   - fix d = 1000, N = 200
 %   - candidate grid: {0.01, 0.05, 0.10, ..., 0.50}
 %   - 5 replications, each with two i.i.d. (a, b) samples (training and
 %     validation), both drawn through gen_problem with distinct seeds
-%   - score = mean ((A_va * x - b_va)^2) on the validation sample
+%   - score = mean((A_va * x - b_va)^2) on the validation sample
 % Independently for SAA-L_q' (q' in {1.01, 1.5, 2}) and LASSO.
 %
-% Output: ../data/exp1/lambda_best.mat with one entry per method.
+% Returns a containers.Map keyed by method name -> selected lambda.
+% Also writes ../data/exp1/lambda_best.mat for bookkeeping.
+%
+% Can be invoked standalone from the MATLAB prompt:
+%   >> lambda_best = cv_lambda();
 
-clear; close all; rng(0);
+rng(0);
 
 % --- problem / cv setup ---
 d_cv         = 1000;

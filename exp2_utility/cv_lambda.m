@@ -1,18 +1,18 @@
-% cv_lambda.m  --  Cross-validate the regularization weight lambda_0 for
-% Experiment 2 (heavy-tailed utility problem).  Follows the procedure in
-% Section 4.2 of Liu & Tong 2026:
-%   - fix d = 1000 and N = 200
-%   - for each candidate lambda in {0.01, 0.05, 0.10, ..., 0.50}
-%     and each replication rep = 1..5, draw two independent samples of
-%     xi (one for training, one for validation), solve the regularized
-%     SAA on training, then score the unregularized objective on
-%     validation
-%   - select lambda minimizing the mean validation cost
+function lambda_best = cv_lambda()
+% CV_LAMBDA  Cross-validate lambda_0 for Experiment 2 (heavy-tailed
+% utility problem).  Follows Section 4.2 of Liu & Tong 2026:
+%   - fix d = 1000, N = 200
+%   - candidate grid: {0.01, 0.05, 0.10, ..., 0.50}
+%   - for each lambda and each rep=1..5, draw two independent xi
+%     samples (training + validation), solve the regularized SAA on
+%     training, score the unregularized objective on validation.
+%   - select lambda minimizing the mean validation cost.
 % Independently for SAA-L1.01, SAA-L2.00, and LASSO.
 %
-% Output: writes ../data/exp2/lambda_best.mat with one field per method.
+% Returns a containers.Map keyed by method name -> selected lambda.
+% Also writes ../data/exp2/lambda_best.mat for bookkeeping.
 
-clear; close all; rng(0);
+rng(0);
 
 % --- piecewise affine phi parameters ---
 pp_path = fullfile(fileparts(mfilename('fullpath')), '..', 'data', 'exp2', ...

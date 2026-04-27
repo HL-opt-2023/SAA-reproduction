@@ -224,10 +224,19 @@ produces the figures from the paper.
   `‖x‖_1 ≤ R_ℓ1` (Nemirovski et al. 2009 Eq. (93)).
 * **SMD-L2**: robust SA in the 2-norm setting with Euclidean projection
   on `‖x‖_2 ≤ R_ℓ2`.
-* **Cross-validation** is implemented as standalone scripts; the
-  numerical values selected by these scripts (under the bundled
-  coefficient file) are also hard-coded inside `run_exp{1,2}.m` so
-  you can skip running them if you trust the bundled values.
+* **Cross-validation** is controlled by a single flag at the top of
+  `run_exp{1,2}.m`:
+
+  ```matlab
+  run_cross_validation = false;   % use hardcoded picks (default)
+  run_cross_validation = true;    % invoke cv_lambda()/cv_theta() inline
+  ```
+
+  When the flag is `false` (default) the script uses the values that
+  every prior cross-validation chose under the bundled coefficient
+  file.  When `true`, the script calls the cross-validation routines
+  (which can also be run standalone from the MATLAB prompt:
+  `lambda_best = cv_lambda();`).
   * `exp{1,2}/cv_lambda.m` — λ_0 cross-validation on `(d=1000,
     N=200)` over the paper's grid `{0.01, 0.05, …, 0.5}`.
     Reports the best λ for each of `SAA-L_{q'}` and `LASSO`,

@@ -1,19 +1,21 @@
-% cv_theta.m  --  Cross-validate the SMD step-size scalar theta
+function [theta_smd_l1, theta_smd_l2] = cv_theta()
+% CV_THETA  Cross-validate the SMD step-size scalar theta
 % (Appendix E of Liu & Tong 2026):
 %   - fix d = 1000, N = 600
 %   - candidate grid: {a*b : a = 1..9, b in {0.1, 1, 10, 100, 1000}}
 %   - for each theta and each rep = 1..5, draw two i.i.d. samples
 %     (optimization + validation), train SMD on the optimization set,
-%     score the unregularized objective on the validation set
-%   - select theta minimizing mean validation cost
+%     score the unregularized objective on the validation set.
+%   - select theta minimizing mean validation cost.
 % Independently for SMD-L1 (entropic) and SMD-L2 (robust SA).
 %
-% Requires that the high-fidelity reference x*(d=1000) is already cached
-% at  cache/x_ref_d1000.mat  (run precompute_xref first).
+% Returns the best (theta_smd_l1, theta_smd_l2).
+% Also writes ../data/exp2/theta_smd.mat for bookkeeping.
 %
-% Output: ../data/exp2/theta_smd.mat with theta_smd_l1, theta_smd_l2.
+% Requires that the high-fidelity reference x*(d=1000) is already
+% cached at  cache/x_ref_d1000.mat  (e.g. via precompute_xref slurm).
 
-clear; close all; rng(0);
+rng(0);
 
 % phi parameters
 pp_path = fullfile(fileparts(mfilename('fullpath')), '..', 'data', 'exp2', ...

@@ -170,33 +170,43 @@ if ~in_sweep_mode
     save(xref_path, 'x_ref', 'd_list', 'N_ref', 'vk', 'sk', 'M_pen', 'alpha');
 end
 
-% --------------------- lambda_0 (use prior cross-validation picks; skip cross-validation) -------
-% Paper grid is {0.01, 0.05, ..., 0.5}; cross-validation always picked the endpoint 0.5.
-% Hard-code values from prior cross-validation runs.
+% --------------------- lambda_0 -----------------------------------
+% Toggle: when true, run cv_lambda(); when false, use the hardcoded
+% picks from prior cross-validation under the bundled coefficients.
+run_cross_validation = false;
+
 methods_reg = [arrayfun(@(q) sprintf('SAA-L%.2f', q), q_prime_list, 'uni', 0), {'LASSO'}];
-lambda_best = containers.Map(methods_reg, num2cell(zeros(1, numel(methods_reg))));
-hardcoded_lam = struct('SAA_L1_01', 0.450, 'SAA_L2_00', 0.500, 'LASSO', 0.400);
-for mi = 1:numel(methods_reg)
-    name = methods_reg{mi};
-    if strcmp(name, 'LASSO')
-        lambda_best(name) = hardcoded_lam.LASSO;
-    elseif strcmp(name, 'SAA-L1.01')
-        lambda_best(name) = hardcoded_lam.SAA_L1_01;
-    elseif strcmp(name, 'SAA-L2.00')
-        lambda_best(name) = hardcoded_lam.SAA_L2_00;
-    else
-        lambda_best(name) = 0.5;   % default for any other q'
+if run_cross_validation
+    fprintf('Running lambda cross-validation (cv_lambda)...\n');
+    lambda_best = cv_lambda();
+else
+    lambda_best = containers.Map(methods_reg, num2cell(zeros(1, numel(methods_reg))));
+    hardcoded_lam = struct('SAA_L1_01', 0.450, 'SAA_L2_00', 0.500, 'LASSO', 0.400);
+    for mi = 1:numel(methods_reg)
+        name = methods_reg{mi};
+        if strcmp(name, 'LASSO')
+            lambda_best(name) = hardcoded_lam.LASSO;
+        elseif strcmp(name, 'SAA-L1.01')
+            lambda_best(name) = hardcoded_lam.SAA_L1_01;
+        elseif strcmp(name, 'SAA-L2.00')
+            lambda_best(name) = hardcoded_lam.SAA_L2_00;
+        else
+            lambda_best(name) = 0.5;   % default for any other q'
+        end
+        fprintf('  %-10s  lambda_0 = %.3f  (hardcoded)\n', name, lambda_best(name));
     end
-    fprintf('  %-10s  lambda_0 = %.3f  (hardcoded)\n', name, lambda_best(name));
 end
 
-% --------------------- theta for SMD (use prior cross-validation picks; skip cross-validation) --
-% Prior cross-validation (45-candidate Appendix-E grid) consistently picked
-%   theta_SMD_L1 = 90  and  theta_SMD_L2 = 1.
-theta_smd_l1 = 90;
-theta_smd_l2 = 1;
-fprintf('  theta_SMD_L1 = %g   theta_SMD_L2 = %g  (hardcoded)\n', ...
-        theta_smd_l1, theta_smd_l2);
+% --------------------- theta for SMD ------------------------------
+if run_cross_validation
+    fprintf('Running SMD theta cross-validation (cv_theta)...\n');
+    [theta_smd_l1, theta_smd_l2] = cv_theta();
+else
+    theta_smd_l1 = 6;     % paper Appendix E selection under bundled vk, sk
+    theta_smd_l2 = 0.6;
+    fprintf('  theta_SMD_L1 = %g   theta_SMD_L2 = %g  (hardcoded)\n', ...
+            theta_smd_l1, theta_smd_l2);
+end
 
 % --------------------- Main sweep -----------------------------------
 % methods_reg = cross-validation-selected lambda; (no fixed-lambda comparison column this run)

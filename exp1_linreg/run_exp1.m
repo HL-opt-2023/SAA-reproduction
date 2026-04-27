@@ -21,16 +21,27 @@ q_prime_list = [1.01, 1.5, 2.0];
 lambda_grid  = [0.01 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5];
 gd_max_iter  = 500000;
 gd_tol       = 1e-8;       % unused (relative-stability window-based termination)
+
+% Toggle: when true, run lambda cross-validation (cv_lambda); when
+% false, use the hard-coded picks (the value selected by every prior
+% cross-validation under the bundled coefficients).
+run_cross_validation = false;
+
 outdir       = fullfile(fileparts(mfilename('fullpath')), 'results');
 if ~exist(outdir, 'dir'); mkdir(outdir); end
 
-% --------------------- lambda_0 (use prior cross-validation picks; skip cross-validation) -------
-% Prior cross-validation (paper grid {0.01, 0.05, ..., 0.5}) always picked the endpoint 0.5
-% across all q' and LASSO. Hard-code 0.5 to skip the slow cross-validation stage.
+% --------------------- lambda_0 ------------------------------------
 methods_reg = [arrayfun(@(q) sprintf('SAA-L%.2f', q), q_prime_list, 'uni', 0), {'LASSO'}];
-lambda_best = containers.Map(methods_reg, num2cell(0.5*ones(1, numel(methods_reg))));
-for mi = 1:numel(methods_reg)
-    fprintf('  %-10s  lambda_0 = %.3f  (hardcoded)\n', methods_reg{mi}, lambda_best(methods_reg{mi}));
+if run_cross_validation
+    fprintf('Running lambda cross-validation (cv_lambda)...\n');
+    lambda_best = cv_lambda();
+else
+    % All prior cross-validation runs picked the grid endpoint 0.5.
+    lambda_best = containers.Map(methods_reg, num2cell(0.5*ones(1, numel(methods_reg))));
+    for mi = 1:numel(methods_reg)
+        fprintf('  %-10s  lambda_0 = %.3f  (hardcoded)\n', ...
+                methods_reg{mi}, lambda_best(methods_reg{mi}));
+    end
 end
 
 % --------------------- Main sweep -----------------------------------
