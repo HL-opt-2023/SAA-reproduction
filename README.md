@@ -160,4 +160,5 @@ numerical experiments.  The version of record appears in
 
 ## Contact
 
-Code maintained by HL-opt-2023 (https://github.com/HL-opt-2023).
+Hongcheng Liu — liu.h@ufl.edu
+GitHub: [HL-opt-2023](https://github.com/HL-opt-2023)
