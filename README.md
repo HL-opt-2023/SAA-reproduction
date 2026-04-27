@@ -1,4 +1,4 @@
-# Sample average approximation for convex stochastic programming
+# Sample average approximation (SAA) for convex stochastic programming
 
 This repository reproduces the two numerical experiments in
 
@@ -70,7 +70,7 @@ Reported in paper: Tables S4–S8, Figures 4 and 4b.
 ## Algorithms and methods involved in the experiments
 
 Both experiments share the SAA-family methods (A)–(D) below; Experiment
-2 additionally includes the two stochastic mirror descent variants (E)
+2 additionally includes the two stochastic mirror descent (SMD) variants (E)
 and (F).
 
 (A) **SAA_r** — vanilla SAA solving the empirical objective
