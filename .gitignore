@@ -1,0 +1,22 @@
+# MATLAB
+*.asv
+*.m~
+slprj/
+*.autosave
+octave-workspace
+
+# Cache (regenerated on each cluster run)
+**/cache/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+
+# Local test scratch — keep results/, data/ tracked
+**/results/.DS_Store
