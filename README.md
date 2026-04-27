@@ -133,9 +133,12 @@ RelDiff(x) = 100 · ( Gap(x_SMD) − Gap(x_SAA) )
 │   └── exp2/
 │       └── piecewise_parameter.mat   (v, s for ϕ(t) = max_k(v_k + s_k·t))
 ├── exp1_linreg/
-│   └── run_exp1.m                    main driver (single-cell + aggregator)
+│   ├── run_exp1.m                    main driver (single-cell + aggregator)
+│   └── cv_lambda.m                   cross-validate λ_0 for SAA-L_q' / LASSO
 ├── exp2_utility/
-│   └── run_exp2.m                    main driver (single-cell + aggregator)
+│   ├── run_exp2.m                    main driver (single-cell + aggregator)
+│   ├── cv_lambda.m                   cross-validate λ_0 for SAA-L_q' / LASSO
+│   └── cv_theta.m                    cross-validate θ for SMD-L1 / SMD-L2
 ├── slurm/                            HPC batch scripts
 │   ├── run_exp1.slurm                aggregator job
 │   ├── sweep_exp1.slurm              SLURM array job — one task per
@@ -221,14 +224,22 @@ produces the figures from the paper.
   `‖x‖_1 ≤ R_ℓ1` (Nemirovski et al. 2009 Eq. (93)).
 * **SMD-L2**: robust SA in the 2-norm setting with Euclidean projection
   on `‖x‖_2 ≤ R_ℓ2`.
-* **Cross-validation**:
-  * lambda cross-validation on (d=1000, N=200) over the paper's grid `{0.01, 0.05, …,
-    0.5}`; in our experiments the grid endpoint `0.5` was always
-    selected, so the published `run_exp{1,2}.m` hard-codes `0.5`.
-  * theta cross-validation (Appendix E) for SMD step size on (d=1000, N=600) over
-    `{a·b : a∈1..9, b∈{0.1, 1, 10, 100, 1000}}`.  Selected values
-    under `data/exp2/piecewise_parameter.mat`:
-    `θ_SMD-L1 = 6`, `θ_SMD-L2 = 0.6`.
+* **Cross-validation** is implemented as standalone scripts; the
+  numerical values selected by these scripts (under the bundled
+  coefficient file) are also hard-coded inside `run_exp{1,2}.m` so
+  you can skip running them if you trust the bundled values.
+  * `exp{1,2}/cv_lambda.m` — λ_0 cross-validation on `(d=1000,
+    N=200)` over the paper's grid `{0.01, 0.05, …, 0.5}`.
+    Reports the best λ for each of `SAA-L_{q'}` and `LASSO`,
+    independently.  In our experiments the grid endpoint `0.5` was
+    always selected.
+  * `exp2_utility/cv_theta.m` — θ cross-validation (Appendix E) for
+    the SMD step size on `(d=1000, N=600)` over the 45-candidate
+    grid `{a·b : a∈1..9, b∈{0.1, 1, 10, 100, 1000}}`.  Selected
+    values under `data/exp2/piecewise_parameter.mat` are
+    `θ_SMD-L1 = 6` and `θ_SMD-L2 = 0.6`.  Requires
+    `cache/x_ref_d1000.mat` (run the bootstrap stage of
+    `run_exp2.m` first).
 * **High-fidelity reference solution**: per-`d`, an unregularized SAA
   solve with `N_ref = 5000` cached in `cache/x_ref_d<d>.mat`.
 
@@ -269,6 +280,33 @@ numerical experiments.  The version of record appears in
   doi     = {10.1007/s10107-026-02335-3}
 }
 ```
+
+## References
+
+The papers explicitly cited above (consistent with the bibliography
+in Liu & Tong 2026):
+
+* **Liu, H. and Tong, J. (2026).** Metric entropy-free sample
+  complexity bounds for sample average approximation in convex
+  stochastic programming.  *Mathematical Programming.*
+  https://doi.org/10.1007/s10107-026-02335-3
+* **Chambolle, A., De Vore, R. A., Lee, N.-Y., and Lucier, B. J. (1998).**
+  Nonlinear wavelet image processing: variational problems, compression,
+  and noise removal through wavelet shrinkage.  *IEEE Transactions on
+  Image Processing*, 7(3):319–335.
+* **Fan, J., Xue, L., and Zou, H. (2014).**  Strong oracle optimality
+  of folded concave penalized estimation.  *Annals of Statistics*,
+  42(3):819–849.
+* **Liu, H., Wang, X., Yao, T., Li, R., and Ye, Y. (2019).**  Sample
+  average approximation with sparsity-inducing penalty for
+  high-dimensional stochastic programming.  *Mathematical Programming*,
+  178:69–108.
+* **Nemirovski, A., Juditsky, A., Lan, G., and Shapiro, A. (2009).**
+  Robust stochastic approximation approach to stochastic programming.
+  *SIAM Journal on Optimization*, 19(4):1574–1609.
+* **Tibshirani, R. (1996).**  Regression shrinkage and selection via
+  the lasso.  *Journal of the Royal Statistical Society, Series B
+  (Statistical Methodology)*, 58(1):267–288.
 
 ## Contact
 
